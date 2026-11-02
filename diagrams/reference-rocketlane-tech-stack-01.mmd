@@ -1,0 +1,99 @@
+flowchart TB
+  subgraph EDGE["Clients and edge"]
+    U["Browser users<br/>[OBSERVED]"]
+    MOB["iOS / Android apps<br/>framework unknown [OBSERVED]"]
+    R53["Route 53 DNS<br/>wildcard *.rocketlane.com [OBSERVED]"]
+    CF["CloudFront + S3 static hosting<br/>ACM certs, HSTS preload [OBSERVED]"]
+    WAF["AWS WAF, ALB, Global Accelerator<br/>[SECONDARY]"]
+  end
+
+  subgraph FE["Front end"]
+    SPA["React 18.3.1 SPA app.rocketlane.com<br/>webpack 5, TypeScript [OBSERVED]"]
+    LIBS["Redux + redux-saga, React Query<br/>Ant Design, styled-components [OBSERVED]"]
+    CKE["CKEditor 5 + CKEditor Cloud collab<br/>[OBSERVED]"]
+    BRY["Bryntum Gantt / Scheduler Pro<br/>[OBSERVED]"]
+    AGG["AG Grid Enterprise, in-house Sheets<br/>[OBSERVED] / [INFERRED]"]
+    MF["Module Federation remotes<br/>signals NitroPages, agents [OBSERVED]"]
+    PORTAL["Customer portal, same SPA<br/>custom domains [OBSERVED]"]
+    IDAPP["id.rocketlane.com login app<br/>Vite + React [OBSERVED]"]
+  end
+
+  subgraph SVC["API and services"]
+    API["Core API api / api.eu<br/>Java Spring Boot [CONFIRMED]"]
+    PUB["Public REST /api/1.0<br/>api-key, 100 rpm [CONFIRMED]"]
+    AUTO["Automations engine<br/>trigger-condition-action [CONFIRMED]"]
+    WH["Webhooks = automation action<br/>task-only, Basic Auth [CONFIRMED]"]
+    CONV["conversation-service, admin API<br/>marketplace, sheets API [OBSERVED]"]
+    EMAIL["emails service<br/>Node Express on App Runner [OBSERVED]"]
+    ECS["Amazon ECS containers<br/>[SECONDARY]"]
+  end
+
+  subgraph DATA["Data stores"]
+    PG["PostgreSQL on RDS<br/>[SECONDARY]"]
+    REDIS["Redis ElastiCache<br/>cache + job queue [SECONDARY]"]
+    CH["ClickHouse reporting<br/>[CONFIRMED]"]
+    S3F["Files in AWS, encrypted<br/>S3 [INFERRED]"]
+    REGION["US DC + EU DC Germany<br/>[CONFIRMED]"]
+  end
+
+  subgraph AI["AI - Nitro"]
+    PY["Python AI/LLM services<br/>[CONFIRMED]"]
+    LLM["OpenAI, Anthropic Claude, Google<br/>direct APIs [CONFIRMED] / [INFERRED]"]
+    WV["Weaviate vector DB, rocket-vector<br/>[CONFIRMED]"]
+    LS["LangSmith tracing<br/>LangChain [INFERRED]"]
+    E2B["E2B agent sandboxes<br/>[CONFIRMED]"]
+    MCP["MCP server, streamable HTTP<br/>Python uvicorn [OBSERVED]"]
+    SK["Scalekit OAuth for MCP<br/>[CONFIRMED]"]
+    NOTE["AI Notetaker + cloud recordings<br/>Gong, Zoom, Teams, Meet [CONFIRMED]"]
+    BIF["Bifrost AI gateway fork<br/>[INFERRED]"]
+  end
+
+  subgraph SAAS["Third-party SaaS"]
+    OKTA["Okta login today<br/>[OBSERVED]"]
+    COG["AWS Cognito, migrating<br/>[CONFIRMED]"]
+    PUSH["Pusher real-time<br/>[CONFIRMED]"]
+    DD["Datadog APM + RUM, LogRocket<br/>[CONFIRMED]"]
+    MIX["Mixpanel analytics<br/>[CONFIRMED]"]
+    SG["SendGrid email<br/>[CONFIRMED]"]
+    WK["Workato custom integrations<br/>[CONFIRMED]"]
+    INT["Salesforce, HubSpot, Jira, Slack, Teams<br/>native apps [CONFIRMED]"]
+    WEB["Webflow, Freshdesk, ReadMe, Statuspage<br/>[OBSERVED]"]
+  end
+
+  U --> R53 --> CF --> SPA
+  MOB --> WAF
+  SPA --> LIBS
+  SPA --> CKE
+  SPA --> BRY
+  SPA --> AGG
+  SPA --> MF
+  SPA --> PORTAL
+  IDAPP --> OKTA
+  IDAPP --> COG
+  SPA --> WAF --> API
+  API --> ECS
+  PUB --> API
+  API --> AUTO --> WH
+  API --> CONV
+  API --> EMAIL --> SG
+  API --> PG
+  API --> REDIS
+  API --> CH
+  API --> S3F
+  API --> PUSH
+  SPA --> PUSH
+  CKE --> CKCS["CKEditor Cloud Services<br/>[OBSERVED]"]
+  MF --> PY
+  PY --> LLM
+  PY --> WV
+  PY --> LS
+  PY --> E2B
+  PY --> BIF
+  NOTE --> PY
+  MCP --> API
+  MCP --> SK
+  SPA --> DD
+  SPA --> MIX
+  API --> WK
+  API --> INT
+  PG --- REGION

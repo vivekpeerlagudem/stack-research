@@ -1,0 +1,11 @@
+*
+!.gitignore
+!README.md
+!reference-rocketlane-tech-stack.md
+!ws1-infra.md
+!ws2-docs.md
+!ws3-secondary.md
+!diagrams/
+diagrams/*
+!diagrams/reference-rocketlane-tech-stack-01.mmd
+!diagrams/reference-rocketlane-tech-stack-01.svg
